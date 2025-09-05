@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AuthentiWave Prototype</title>
+    <title>AuthentiWave - Signal Authentication System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -14,283 +14,886 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      :root {
+        --primary-blue: #3b82f6;
+        --primary-green: #10b981;
+        --primary-red: #ef4444;
+        --primary-purple: #8b5cf6;
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --bg-elevated: #334155;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --border-color: #475569;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         font-family: "Inter", sans-serif;
-        background-color: #111827; /* bg-gray-900 */
+        background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 100%);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
       }
-      .card {
-        background-color: #1f2937; /* bg-gray-800 */
-        border: 1px solid #374151; /* border-gray-700 */
-        border-radius: 0.75rem; /* rounded-xl */
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
-        transition: all 0.3s ease;
+
+      .glass-card {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(71, 85, 105, 0.3);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3),
+          0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
-      .card-title {
-        color: #9ca3af; /* text-gray-400 */
-        font-weight: 500;
-        margin-bottom: 1rem;
+
+      .glass-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(59, 130, 246, 0.5),
+          transparent
+        );
+      }
+
+      .glass-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4),
+          0 0 0 1px rgba(59, 130, 246, 0.1);
+      }
+
+      .section-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
+        gap: 0.75rem;
       }
-      .card-title i {
-        margin-right: 0.5rem;
-        color: #6b7280; /* text-gray-500 */
+
+      .section-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
       }
+
       .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .status-badge::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .status-badge:hover::before {
+        left: 100%;
+      }
+
+      .status-pending {
+        background: linear-gradient(135deg, #374151, #4b5563);
+        color: #d1d5db;
+        border: 1px solid #6b7280;
+      }
+
+      .status-approved {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: #d1fae5;
+        border: 1px solid #34d399;
+        animation: pulse-green 2s infinite;
+      }
+
+      .status-deceptive {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: #fee2e2;
+        border: 1px solid #f87171;
+        animation: pulse-red 2s infinite;
+      }
+
+      @keyframes pulse-green {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+      }
+
+      @keyframes pulse-red {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+      }
+
+      .btn {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
         font-weight: 600;
-        font-size: 0.875rem;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn-ally {
+        background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      }
+
+      .btn-ally:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+      }
+
+      .btn-adversary {
+        background: linear-gradient(135deg, #991b1b, #ef4444);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-adversary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+      }
+
+      .btn-learn {
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-learn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .param-value {
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        background: linear-gradient(135deg, #374151, #4b5563);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        font-weight: 600;
+      }
+
+      .formula {
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        color: var(--text-primary);
+        background: linear-gradient(135deg, var(--bg-dark), #1e293b);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        text-align: center;
+        position: relative;
+      }
+
+      .formula::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-blue),
+          var(--primary-purple)
+        );
+      }
+
+      .db-entry {
+        background: linear-gradient(135deg, #374151, #4b5563);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        color: #a5f3fc;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
         transition: all 0.3s ease;
       }
-      .status-pending {
-        background-color: #374151; /* bg-gray-700 */
-        color: #d1d5db; /* text-gray-300 */
+
+      .db-entry:hover {
+        background: linear-gradient(135deg, #4b5563, #6b7280);
+        transform: translateX(5px);
       }
-      .status-approved {
-        background-color: #059669; /* bg-green-600 */
-        color: #d1fae5; /* text-green-100 */
-      }
-      .status-deceptive {
-        background-color: #dc2626; /* bg-red-600 */
-        color: #fee2e2; /* text-red-100 */
-      }
-      .uav-icon {
-        transition: transform 0.5s ease, color 0.5s ease;
-      }
-      .uav-active {
-        transform: scale(1.1) rotate(2deg);
-        color: #34d399; /* text-green-400 */
-      }
-      .param-value {
-        font-family: "monospace";
-        font-size: 1.1rem;
-        color: #f9fafb; /* text-gray-50 */
-        background-color: #374151; /* bg-gray-700 */
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-      }
-      .formula {
-        font-family: "monospace";
-        color: #e5e7eb; /* text-gray-200 */
-        background-color: #111827; /* bg-gray-900 */
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #374151; /* border-gray-700 */
-      }
+
       input[type="range"] {
         -webkit-appearance: none;
         appearance: none;
         width: 100%;
         height: 8px;
-        background: #374151; /* bg-gray-700 */
+        background: linear-gradient(90deg, #374151, #4b5563);
         border-radius: 5px;
         outline: none;
-        opacity: 0.7;
-        transition: opacity 0.2s;
+        transition: all 0.3s ease;
       }
+
       input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 20px;
-        height: 20px;
-        background: #3b82f6; /* bg-blue-500 */
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
         cursor: pointer;
         border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
       }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+      }
+
       input[type="range"]::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        background: #3b82f6; /* bg-blue-500 */
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
         cursor: pointer;
         border-radius: 50%;
+        border: none;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
       }
-      .btn {
-        padding: 0.75rem 1.5rem;
+
+      /* Waveform Animation */
+      .waveform-container {
+        height: 120px;
+        background: linear-gradient(135deg, var(--bg-dark), #1e293b);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+        margin: 1rem 0;
+      }
+
+      .waveform {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary-blue) 0%,
+          var(--primary-purple) 50%,
+          var(--primary-blue) 100%
+        );
+        opacity: 0.7;
+        animation: wave-flow 2s ease-in-out infinite;
+      }
+
+      @keyframes wave-flow {
+        0%,
+        100% {
+          transform: translateX(-100%);
+        }
+        50% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* Fingerprint Visualization */
+      .fingerprint-visual {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        gap: 2px;
+        padding: 1rem;
+        background: var(--bg-dark);
         border-radius: 0.5rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        display: inline-flex;
+        border: 1px solid var(--border-color);
+        margin: 1rem 0;
+      }
+
+      .fingerprint-bit {
+        aspect-ratio: 1;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        animation: fingerprint-generate 0.5s ease-out forwards;
+        opacity: 0;
+      }
+
+      .fingerprint-bit.active {
+        background: var(--primary-green);
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      }
+
+      .fingerprint-bit.inactive {
+        background: #374151;
+      }
+
+      @keyframes fingerprint-generate {
+        0% {
+          opacity: 0;
+          transform: scale(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Workflow Animation */
+      .workflow-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 2rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+      }
+
+      .workflow-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+      }
+
+      .workflow-step::after {
+        content: "→";
+        position: absolute;
+        right: -1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        color: var(--primary-blue);
+        font-weight: bold;
+      }
+
+      .workflow-step:last-child::after {
+        display: none;
+      }
+
+      .workflow-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
         align-items: center;
         justify-content: center;
-      }
-      .btn-ally {
-        background-color: #1d4ed8; /* bg-blue-700 */
+        font-size: 1.5rem;
         color: white;
+        transition: all 0.3s ease;
+        position: relative;
       }
-      .btn-ally:hover {
-        background-color: #1e40af; /* bg-blue-800 */
+
+      .workflow-icon.active {
+        animation: workflow-pulse 1s ease-in-out infinite;
       }
-      .btn-adversary {
-        background-color: #991b1b; /* bg-red-800 */
+
+      @keyframes workflow-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      .workflow-step-1 .workflow-icon {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      }
+      .workflow-step-2 .workflow-icon {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      }
+      .workflow-step-3 .workflow-icon {
+        background: linear-gradient(135deg, #10b981, #047857);
+      }
+      .workflow-step-4 .workflow-icon {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+
+      /* UAV Animation */
+      .uav-container {
+        position: relative;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--bg-dark), #1e293b);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+
+      .uav-icon {
+        font-size: 4rem;
+        color: var(--text-muted);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .uav-icon.active {
+        color: var(--primary-green);
+        animation: uav-fly 2s ease-in-out infinite;
+      }
+
+      .uav-icon.blocked {
+        color: var(--primary-red);
+        animation: uav-shake 0.5s ease-in-out infinite;
+      }
+
+      @keyframes uav-fly {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-10px) rotate(2deg);
+        }
+        75% {
+          transform: translateY(5px) rotate(-2deg);
+        }
+      }
+
+      @keyframes uav-shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      /* Progress Bar */
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #374151;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 1rem 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary-blue),
+          var(--primary-purple)
+        );
+        border-radius: 4px;
+        transition: width 0.5s ease;
+        width: 0%;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .glass-card {
+          padding: 1.5rem;
+        }
+
+        .workflow-container {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .workflow-step::after {
+          content: "↓";
+          right: auto;
+          bottom: -1rem;
+          top: auto;
+          transform: none;
+        }
+      }
+
+      /* Loading Animation */
+      .loading-dots {
+        display: inline-block;
+      }
+
+      .loading-dots::after {
+        content: "";
+        animation: loading-dots 1.5s infinite;
+      }
+
+      @keyframes loading-dots {
+        0%,
+        20% {
+          content: "";
+        }
+        40% {
+          content: ".";
+        }
+        60% {
+          content: "..";
+        }
+        80%,
+        100% {
+          content: "...";
+        }
+      }
+
+      /* Step Container Animations */
+      .step-container {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+
+      .step-container.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .step-container.hidden {
+        display: none;
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Step indicator styling */
+      .workflow-step.active .workflow-icon {
+        animation: workflow-pulse 1s ease-in-out infinite;
+      }
+
+      .workflow-step.completed .workflow-icon {
+        background: linear-gradient(135deg, #10b981, #047857) !important;
+      }
+
+      .workflow-step.completed .workflow-icon::after {
+        content: "✓";
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #10b981;
         color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
       }
-      .btn-adversary:hover {
-        background-color: #7f1d1d; /* bg-red-900 */
+
+      /* Enhanced glow effects */
+      .status-approved {
+        animation: green-glow 2s ease-in-out infinite;
       }
-      .btn-learn {
-        background-color: #047857; /* bg-green-700 */
-        color: white;
+
+      .status-deceptive {
+        animation: red-glow 2s ease-in-out infinite;
       }
-      .btn-learn:hover {
-        background-color: #065f46; /* bg-green-800 */
+
+      @keyframes green-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(16, 185, 129, 0.4),
+            0 0 40px rgba(16, 185, 129, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(16, 185, 129, 0.6),
+            0 0 60px rgba(16, 185, 129, 0.3);
+        }
       }
-      .db-entry {
-        background-color: #374151;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-family: monospace;
-        color: #a5f3fc; /* text-cyan-200 */
-        margin-bottom: 0.5rem;
-        text-align: center;
+
+      @keyframes red-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(239, 68, 68, 0.4),
+            0 0 40px rgba(239, 68, 68, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(239, 68, 68, 0.6),
+            0 0 60px rgba(239, 68, 68, 0.3);
+        }
+      }
+
+      /* Database entry highlight animation */
+      .db-entry.highlighted {
+        animation: highlight-pulse 0.8s ease-in-out;
+      }
+
+      @keyframes highlight-pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
     </style>
   </head>
-  <body class="text-gray-300">
-    <div class="container mx-auto p-4 md:p-8">
+  <body>
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-white">AuthentiWave</h1>
-        <p class="text-lg text-gray-400 mt-2">
-          Signal Authentication & Verification Prototype
+        <h1
+          class="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text text-transparent mb-4"
+        >
+          AuthentiWave
+        </h1>
+        <p class="text-xl text-gray-300 mb-2">
+          Signal Authentication & Anti-Spoofing System
+        </p>
+        <p class="text-sm text-gray-400">
+          Detect authentic signals vs. spoofed attacks in real-time
         </p>
       </div>
 
-      <!-- Main Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left Column: Controls & Fingerprint -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Signal Source -->
-          <div class="card">
-            <h2 class="card-title">
-              <i class="fas fa-satellite-dish"></i>Signal Source
+      <!-- Progress Indicator -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="section-title mb-0">
+            <i class="fas fa-route"></i>Authentication Journey
+          </h2>
+          <div class="text-sm text-gray-400">
+            Step <span id="current-step">1</span> of 4
+          </div>
+        </div>
+        <div class="progress-bar mb-4">
+          <div
+            class="progress-fill"
+            id="journey-progress"
+            style="width: 25%"
+          ></div>
+        </div>
+        <div class="workflow-container">
+          <div class="workflow-step workflow-step-1" id="step-1">
+            <div class="workflow-icon" id="workflow-1">
+              <i class="fas fa-satellite-dish"></i>
+            </div>
+            <span class="text-sm font-medium text-center">1. Signal Input</span>
+          </div>
+          <div class="workflow-step workflow-step-2" id="step-2">
+            <div class="workflow-icon" id="workflow-2">
+              <i class="fas fa-fingerprint"></i>
+            </div>
+            <span class="text-sm font-medium text-center">2. Analysis</span>
+          </div>
+          <div class="workflow-step workflow-step-3" id="step-3">
+            <div class="workflow-icon" id="workflow-3">
+              <i class="fas fa-shield-check"></i>
+            </div>
+            <span class="text-sm font-medium text-center">3. Verification</span>
+          </div>
+          <div class="workflow-step workflow-step-4" id="step-4">
+            <div class="workflow-icon" id="workflow-4">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <span class="text-sm font-medium text-center">4. Result</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Step 1: Signal Input -->
+        <div class="glass-card step-container" id="step-container-1">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title mb-0">
+              <i class="fas fa-satellite-dish"></i>Step 1: Choose Signal Type
             </h2>
-            <p class="text-gray-400 mb-4">
-              Generate a signal from an ally or a potential adversary to begin
-              the verification process.
-            </p>
-            <div class="flex space-x-4">
-              <button id="ally-signal-btn" class="btn btn-ally w-full">
-                <i class="fas fa-shield-halved mr-2"></i>Generate Ally Signal
-              </button>
-              <button
-                id="adversary-signal-btn"
-                class="btn btn-adversary w-full"
-              >
-                <i class="fas fa-skull-crossbones mr-2"></i>Generate Adversary
-                Signal
-              </button>
+            <div
+              class="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full"
+            >
+              Signal Input
             </div>
           </div>
 
-          <!-- Fingerprint Module -->
-          <div class="card">
-            <h2 class="card-title">
-              <i class="fas fa-fingerprint"></i>Fingerprint Module
+          <p class="text-gray-300 mb-6 text-center">
+            Select whether you want to test an
+            <strong class="text-green-400">authentic signal</strong> or a
+            <strong class="text-red-400">spoofed attack</strong> to see how our
+            system responds.
+          </p>
+
+          <!-- Waveform Visualization -->
+          <div class="waveform-container mb-6" id="waveform-container">
+            <div class="waveform" id="waveform"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button id="original-signal-btn" class="btn btn-ally">
+              <i class="fas fa-check-circle"></i>
+              Test Original Signal
+              <small class="block text-xs opacity-75 mt-1"
+                >Legitimate, trusted source</small
+              >
+            </button>
+            <button id="spoofed-signal-btn" class="btn btn-adversary">
+              <i class="fas fa-exclamation-triangle"></i>
+              Test Spoofed Signal
+              <small class="block text-xs opacity-75 mt-1"
+                >Malicious, fake source</small
+              >
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Signal Analysis -->
+        <div class="glass-card step-container hidden" id="step-container-2">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title mb-0">
+              <i class="fas fa-fingerprint"></i>Step 2: Signal Analysis
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Signal Characteristics -->
-              <div>
-                <h3 class="font-semibold text-white mb-3">
-                  Extracted Characteristics
-                </h3>
-                <div class="space-y-3">
-                  <div class="flex justify-between items-center">
-                    <span
-                      ><i class="fas fa-clock w-5 text-gray-500 mr-1"></i>Timing
-                      (T)</span
-                    ><span id="timing-val" class="param-value">0.00</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span
-                      ><i class="fas fa-wave-square w-5 text-gray-500 mr-1"></i
-                      >Frequency (Freq)</span
-                    ><span id="freq-val" class="param-value">0.00</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span
-                      ><i class="fas fa-tags w-5 text-gray-500 mr-1"></i
-                      >Metadata (Meta)</span
-                    ><span id="meta-val" class="param-value">0.00</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span
-                      ><i class="fas fa-chart-line w-5 text-gray-500 mr-1"></i
-                      >Phase</span
-                    ><span id="phase-val" class="param-value">0.00</span>
-                  </div>
+            <div
+              class="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full"
+            >
+              Analysis
+            </div>
+          </div>
+
+          <p class="text-gray-300 mb-6 text-center">
+            Our system extracts key characteristics from the signal and creates
+            a unique digital fingerprint.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Extracted Characteristics -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-chart-line text-blue-400 mr-2"></i>
+                Signal Characteristics
+              </h3>
+              <div class="space-y-4">
+                <div
+                  class="flex justify-between items-center p-3 bg-gray-800 rounded-lg"
+                >
+                  <span class="flex items-center text-gray-300">
+                    <i class="fas fa-clock w-5 text-blue-400 mr-2"></i>
+                    Timing Pattern
+                  </span>
+                  <span id="timing-val" class="param-value">0.00</span>
                 </div>
-              </div>
-              <!-- Weights -->
-              <div>
-                <h3 class="font-semibold text-white mb-3">ML Model Weights</h3>
-                <div class="space-y-3">
-                  <div>
-                    <label for="w1" class="text-sm"
-                      >Weight 1 (Timing): <span id="w1-val">0.40</span></label
-                    >
-                    <input
-                      type="range"
-                      id="w1"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value="0.4"
-                    />
-                  </div>
-                  <div>
-                    <label for="w2" class="text-sm"
-                      >Weight 2 (Freq): <span id="w2-val">0.30</span></label
-                    >
-                    <input
-                      type="range"
-                      id="w2"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value="0.3"
-                    />
-                  </div>
-                  <div>
-                    <label for="w3" class="text-sm"
-                      >Weight 3 (Meta): <span id="w3-val">0.20</span></label
-                    >
-                    <input
-                      type="range"
-                      id="w3"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value="0.2"
-                    />
-                  </div>
-                  <div>
-                    <label for="w4" class="text-sm"
-                      >Weight 4 (Phase): <span id="w4-val">0.10</span></label
-                    >
-                    <input
-                      type="range"
-                      id="w4"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value="0.1"
-                    />
-                  </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-gray-800 rounded-lg"
+                >
+                  <span class="flex items-center text-gray-300">
+                    <i class="fas fa-wave-square w-5 text-purple-400 mr-2"></i>
+                    Frequency
+                  </span>
+                  <span id="freq-val" class="param-value">0.00</span>
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-gray-800 rounded-lg"
+                >
+                  <span class="flex items-center text-gray-300">
+                    <i class="fas fa-tags w-5 text-green-400 mr-2"></i>
+                    Metadata
+                  </span>
+                  <span id="meta-val" class="param-value">0.00</span>
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-gray-800 rounded-lg"
+                >
+                  <span class="flex items-center text-gray-300">
+                    <i class="fas fa-chart-area w-5 text-yellow-400 mr-2"></i>
+                    Phase
+                  </span>
+                  <span id="phase-val" class="param-value">0.00</span>
                 </div>
               </div>
             </div>
-            <!-- Formula & Result -->
-            <div class="mt-6">
-              <h3 class="font-semibold text-white mb-2">
-                Signal Fingerprint (F)
+
+            <!-- Fingerprint Visualization -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-qrcode text-green-400 mr-2"></i>
+                Digital Fingerprint
               </h3>
-              <div class="formula text-center">
-                <p class="text-sm">F = w1*T + w2*Freq + w3*Meta + w4*Phase</p>
+              <div class="fingerprint-visual" id="fingerprint-visual">
+                <!-- Fingerprint bits will be generated by JavaScript -->
+              </div>
+              <div class="mt-4 text-center">
+                <p class="text-sm text-gray-400 mb-2">Fingerprint Score</p>
                 <p
-                  class="text-2xl font-bold mt-2 text-white"
+                  class="text-3xl font-bold text-white"
                   id="fingerprint-result"
                 >
                   0.00
@@ -300,51 +903,130 @@
           </div>
         </div>
 
-        <!-- Right Column: Verification & Output -->
-        <div class="space-y-6">
-          <!-- Verification -->
-          <div class="card">
-            <h2 class="card-title">
-              <i class="fas fa-user-check"></i>Verification Status
+        <!-- Step 3: Verification -->
+        <div class="glass-card step-container hidden" id="step-container-3">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title mb-0">
+              <i class="fas fa-shield-check"></i>Step 3: Verification Process
             </h2>
-            <div id="status-box" class="status-badge status-pending mx-auto">
-              <span id="status-text">Awaiting Signal...</span>
+            <div
+              class="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full"
+            >
+              Verification
             </div>
-            <p
-              id="status-reason"
-              class="text-center text-gray-400 mt-4 text-sm"
-            ></p>
           </div>
 
-          <!-- Fingerprint Database -->
-          <div class="card">
-            <h2 class="card-title">
-              <i class="fas fa-database"></i>Encrypted Fingerprint DB
-            </h2>
-            <div id="db-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-              <!-- DB entries will be populated by JS -->
+          <p class="text-gray-300 mb-6 text-center">
+            The system compares the signal fingerprint against our database of
+            known authentic signals.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Verification Status -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-user-check text-blue-400 mr-2"></i>
+                Verification Result
+              </h3>
+              <div id="status-box" class="status-badge status-pending mb-4">
+                <span id="status-text">Analyzing...</span>
+              </div>
+              <p id="status-reason" class="text-gray-400 text-sm"></p>
             </div>
-            <button id="learn-btn" class="btn btn-learn w-full mt-4" disabled>
-              <i class="fas fa-brain mr-2"></i>Update DB from Signal
-            </button>
+
+            <!-- Database Comparison -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-database text-purple-400 mr-2"></i>
+                Known Authentic Signals
+              </h3>
+              <div id="db-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <!-- DB entries will be populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Final Result -->
+        <div class="glass-card step-container hidden" id="step-container-4">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="section-title mb-0">
+              <i class="fas fa-check-circle"></i>Step 4: System Response
+            </h2>
+            <div
+              class="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full"
+            >
+              Result
+            </div>
           </div>
 
-          <!-- Command Unit -->
-          <div class="card">
-            <h2 class="card-title">
-              <i class="fas fa-cogs"></i>Command Processing Unit
-            </h2>
-            <div class="text-center">
-              <i
-                id="uav-icon"
-                class="fas fa-drone fa-5x text-gray-600 uav-icon"
-              ></i>
-              <p id="cpu-log" class="mt-4 text-white font-semibold">Idle</p>
-              <p id="cpu-subtext" class="text-gray-400 text-sm">
-                Awaiting approved command signal.
-              </p>
+          <p class="text-gray-300 mb-6 text-center">
+            Based on the verification, the system decides whether to trust the
+            signal or block it as a potential threat.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- UAV Response -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-drone text-green-400 mr-2"></i>
+                System Response
+              </h3>
+              <div class="uav-container mb-4">
+                <i id="uav-icon" class="fas fa-drone uav-icon"></i>
+              </div>
+              <div class="text-center">
+                <p id="cpu-log" class="text-white font-semibold text-lg">
+                  Idle
+                </p>
+                <p id="cpu-subtext" class="text-gray-400 text-sm">
+                  Awaiting signal verification
+                </p>
+              </div>
+            </div>
+
+            <!-- Action Summary -->
+            <div>
+              <h3
+                class="text-lg font-semibold text-white mb-4 flex items-center"
+              >
+                <i class="fas fa-clipboard-list text-yellow-400 mr-2"></i>
+                Action Summary
+              </h3>
+              <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-300">Signal Type:</span>
+                  <span id="signal-type" class="text-white">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-300">Fingerprint Score:</span>
+                  <span id="final-fingerprint" class="text-white">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-300">Verification:</span>
+                  <span id="final-verification" class="text-white">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-300">System Action:</span>
+                  <span id="final-action" class="text-white">-</span>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        <!-- Restart Button -->
+        <div class="text-center">
+          <button id="restart-btn" class="btn btn-ally">
+            <i class="fas fa-redo"></i>
+            Test Another Signal
+          </button>
         </div>
       </div>
     </div>
@@ -356,137 +1038,604 @@
         freqVal: document.getElementById("freq-val"),
         metaVal: document.getElementById("meta-val"),
         phaseVal: document.getElementById("phase-val"),
-        w1Val: document.getElementById("w1-val"),
-        w2Val: document.getElementById("w2-val"),
-        w3Val: document.getElementById("w3-val"),
-        w4Val: document.getElementById("w4-val"),
-        w1Slider: document.getElementById("w1"),
-        w2Slider: document.getElementById("w2"),
-        w3Slider: document.getElementById("w3"),
-        w4Slider: document.getElementById("w4"),
         fingerprintResult: document.getElementById("fingerprint-result"),
         statusBox: document.getElementById("status-box"),
         statusText: document.getElementById("status-text"),
         statusReason: document.getElementById("status-reason"),
         dbList: document.getElementById("db-list"),
-        learnBtn: document.getElementById("learn-btn"),
         cpuLog: document.getElementById("cpu-log"),
         cpuSubtext: document.getElementById("cpu-subtext"),
         uavIcon: document.getElementById("uav-icon"),
-        allySignalBtn: document.getElementById("ally-signal-btn"),
-        adversarySignalBtn: document.getElementById("adversary-signal-btn"),
+        originalSignalBtn: document.getElementById("original-signal-btn"),
+        spoofedSignalBtn: document.getElementById("spoofed-signal-btn"),
+        waveform: document.getElementById("waveform"),
+        waveformContainer: document.getElementById("waveform-container"),
+        fingerprintVisual: document.getElementById("fingerprint-visual"),
+        workflow1: document.getElementById("workflow-1"),
+        workflow2: document.getElementById("workflow-2"),
+        workflow3: document.getElementById("workflow-3"),
+        workflow4: document.getElementById("workflow-4"),
+        currentStep: document.getElementById("current-step"),
+        journeyProgress: document.getElementById("journey-progress"),
+        step1: document.getElementById("step-1"),
+        step2: document.getElementById("step-2"),
+        step3: document.getElementById("step-3"),
+        step4: document.getElementById("step-4"),
+        stepContainer1: document.getElementById("step-container-1"),
+        stepContainer2: document.getElementById("step-container-2"),
+        stepContainer3: document.getElementById("step-container-3"),
+        stepContainer4: document.getElementById("step-container-4"),
+        restartBtn: document.getElementById("restart-btn"),
+        signalType: document.getElementById("signal-type"),
+        finalFingerprint: document.getElementById("final-fingerprint"),
+        finalVerification: document.getElementById("final-verification"),
+        finalAction: document.getElementById("final-action"),
       };
 
       // --- State ---
       let state = {
         weights: { w1: 0.4, w2: 0.3, w3: 0.2, w4: 0.1 },
-        // Database of known 'good' fingerprint scores.
-        database: [250.5, 310.2, 285.8],
+        // Database of known 'good' fingerprint scores with more realistic values
+        database: [245.8, 312.4, 289.1, 267.3, 301.7],
         // Current signal being processed
         currentSignal: null,
-        // Tolerance for matching fingerprints
-        tolerance: 20.0,
+        // Tolerance for matching fingerprints (more realistic)
+        tolerance: 15.0,
+        // Processing state
+        isProcessing: false,
+        // Animation timers
+        animationTimers: [],
+        // Current step in the journey
+        currentStepNumber: 1,
+        // Signal type (original or spoofed)
+        signalType: null,
       };
 
       // --- Utility Functions ---
-      /**
-       * Generates a random number within a given range.
-       * @param {number} min - The minimum value.
-       * @param {number} max - The maximum value.
-       * @returns {number} A random number.
-       */
       const getRandom = (min, max) => Math.random() * (max - min) + min;
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      // --- Core Logic ---
+      // --- Step Management Functions ---
+
+      function showStep(stepNumber) {
+        // Hide all step containers
+        document.querySelectorAll(".step-container").forEach((container) => {
+          container.classList.add("hidden");
+          container.classList.remove("active");
+        });
+
+        // Show current step
+        const currentContainer = document.getElementById(
+          `step-container-${stepNumber}`
+        );
+        if (currentContainer) {
+          currentContainer.classList.remove("hidden");
+          setTimeout(() => {
+            currentContainer.classList.add("active");
+          }, 100);
+        }
+
+        // Update progress
+        elements.currentStep.textContent = stepNumber;
+        elements.journeyProgress.style.width = `${(stepNumber / 4) * 100}%`;
+
+        // Update workflow indicators
+        updateWorkflowIndicators(stepNumber);
+
+        // Auto-scroll to the step
+        setTimeout(() => {
+          currentContainer.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+            inline: "nearest",
+          });
+        }, 200);
+      }
+
+      function updateWorkflowIndicators(activeStep) {
+        // Reset all steps
+        [
+          elements.step1,
+          elements.step2,
+          elements.step3,
+          elements.step4,
+        ].forEach((step) => {
+          step.classList.remove("active", "completed");
+        });
+
+        // Mark completed steps
+        for (let i = 1; i < activeStep; i++) {
+          const step = document.getElementById(`step-${i}`);
+          if (step) step.classList.add("completed");
+        }
+
+        // Mark active step
+        const activeStepElement = document.getElementById(`step-${activeStep}`);
+        if (activeStepElement) activeStepElement.classList.add("active");
+      }
+
+      function nextStep() {
+        if (state.currentStepNumber < 4) {
+          state.currentStepNumber++;
+          showStep(state.currentStepNumber);
+        }
+      }
+
+      // --- Advanced Signal Processing ---
 
       /**
-       * Generates a signal object with parameters.
-       * @param {boolean} isAlly - If true, generates parameters within a 'good' range.
+       * Generates a more realistic signal with proper frequency domain characteristics
        */
-      function generateSignal(isAlly) {
-        if (isAlly) {
+      function generateSignal(isOriginal) {
+        if (state.isProcessing) return;
+        state.isProcessing = true;
+
+        // Set signal type
+        state.signalType = isOriginal ? "Original" : "Spoofed";
+
+        // Clear previous animations
+        clearAllAnimations();
+
+        if (isOriginal) {
+          // Original signals: Generate to match one of the database entries
+          const targetFingerprint =
+            state.database[Math.floor(Math.random() * state.database.length)];
+
+          // Calculate parameters that will result in the target fingerprint
+          // Using the formula: F = w1*T + w2*Freq + w3*Meta + w4*Phase
+          // We'll set reasonable base values and adjust one parameter to hit the target
+          const baseT = 130;
+          const baseFreq = 230;
+          const baseMeta = 500;
+          const basePhase = 100;
+
+          // Calculate what Phase should be to hit the target
+          const currentSum =
+            baseT * state.weights.w1 +
+            baseFreq * state.weights.w2 +
+            baseMeta * state.weights.w3;
+          const targetPhase =
+            (targetFingerprint - currentSum) / state.weights.w4;
+
           state.currentSignal = {
-            T: getRandom(100, 150),
-            Freq: getRandom(200, 250),
-            Meta: getRandom(500, 550),
-            Phase: getRandom(80, 120),
+            T: baseT + getRandom(-5, 5), // Small variation
+            Freq: baseFreq + getRandom(-5, 5), // Small variation
+            Meta: baseMeta + getRandom(-10, 10), // Small variation
+            Phase: Math.max(
+              50,
+              Math.min(200, targetPhase + getRandom(-10, 10))
+            ), // Adjusted to hit target
+            SNR: getRandom(25, 35), // High signal-to-noise ratio
+            Modulation: "QPSK", // Known modulation
           };
         } else {
-          // Adversary signals have at least one parameter out of the ordinary range.
+          // Spoofed signals: Generate to NOT match any database entries
           state.currentSignal = {
-            T: getRandom(50, 250),
-            Freq: getRandom(150, 350),
-            Meta: getRandom(400, 700),
-            Phase: getRandom(10, 200),
+            T: getRandom(60, 280), // Erratic timing
+            Freq: getRandom(180, 380), // Unknown frequency
+            Meta: getRandom(350, 750), // Inconsistent metadata
+            Phase: getRandom(20, 180), // Unstable phase
+            SNR: getRandom(8, 22), // Lower signal quality
+            Modulation: "Unknown", // Unknown modulation
           };
-          // Ensure at least one value is significantly different
+
+          // Ensure at least one parameter is significantly anomalous
           const paramToSkew = ["T", "Freq", "Meta", "Phase"][
             Math.floor(Math.random() * 4)
           ];
-          state.currentSignal[paramToSkew] *= Math.random() > 0.5 ? 1.5 : 0.5;
+          state.currentSignal[paramToSkew] *= Math.random() > 0.5 ? 1.8 : 0.3;
         }
-        elements.learnBtn.disabled = false;
-        processSignal();
+
+        processSignalWithAnimation();
       }
 
       /**
-       * Calculates the fingerprint score based on the current signal and weights.
-       * @returns {number} The calculated fingerprint score.
+       * Enhanced fingerprint calculation with FFT simulation and noise analysis
        */
       function calculateFingerprint() {
         if (!state.currentSignal) return 0;
-        const { T, Freq, Meta, Phase } = state.currentSignal;
+
+        const {
+          T,
+          Freq,
+          Meta,
+          Phase,
+          SNR = 20,
+          Modulation = "QPSK",
+        } = state.currentSignal;
         const { w1, w2, w3, w4 } = state.weights;
-        return T * w1 + Freq * w2 + Meta * w3 + Phase * w4;
+
+        // Base calculation - this is the core fingerprint
+        let baseFingerprint = T * w1 + Freq * w2 + Meta * w3 + Phase * w4;
+
+        // For original signals, keep it deterministic (no noise)
+        // For spoofed signals, add some variation to make them clearly different
+        if (state.signalType === "Spoofed") {
+          const noise = (Math.random() - 0.5) * 10; // More noise for spoofed signals
+          baseFingerprint += noise;
+        }
+
+        return Math.max(0, baseFingerprint);
       }
 
       /**
-       * Verifies the fingerprint against the database.
-       * @param {number} fingerprint - The fingerprint score to verify.
-       * @returns {boolean} True if the fingerprint is approved, false otherwise.
+       * Enhanced verification with confidence scoring
        */
       function verifyFingerprint(fingerprint) {
-        return state.database.some(
-          (dbEntry) => Math.abs(dbEntry - fingerprint) <= state.tolerance
-        );
-      }
+        try {
+          let bestMatch = null;
+          let minDistance = Infinity;
 
-      /**
-       * Adds the current signal's fingerprint to the database.
-       */
-      function learnFromSignal() {
-        if (!state.currentSignal) return;
-        const fingerprint = calculateFingerprint();
-        if (!state.database.includes(fingerprint)) {
-          state.database.push(fingerprint);
-          updateDatabaseUI();
-          // Re-verify the signal with the updated database
-          processSignal();
+          state.database.forEach((dbEntry) => {
+            const distance = Math.abs(dbEntry - fingerprint);
+            if (distance < minDistance) {
+              minDistance = distance;
+              bestMatch = dbEntry;
+            }
+          });
+
+          const result = {
+            isApproved: minDistance <= state.tolerance,
+            confidence: Math.max(0, 1 - minDistance / state.tolerance),
+            matchedEntry: bestMatch,
+            distance: minDistance,
+          };
+
+          console.log("Verification result:", result);
+          return result;
+        } catch (error) {
+          console.error("Error in verifyFingerprint:", error);
+          return {
+            isApproved: false,
+            confidence: 0,
+            matchedEntry: null,
+            distance: Infinity,
+          };
         }
       }
 
       /**
-       * Takes the current signal and runs it through the full verification process.
+       * Process signal with full animation sequence
        */
-      function processSignal() {
+      async function processSignalWithAnimation() {
+        try {
+          console.log("Starting signal processing animation...");
+
+          // Step 1: Animate waveform and move to step 2
+          await animateWaveform();
+          nextStep();
+          await sleep(1500);
+
+          // Step 2: Update signal characteristics with animation
+          await updateSignalUIWithAnimation();
+          await sleep(2000); // Give more time to see the characteristics
+
+          // Generate fingerprint in Step 2 (before moving to Step 3)
+          const fingerprint = await generateFingerprintWithProgress();
+          console.log("Generated fingerprint:", fingerprint);
+
+          // Force update the fingerprint result to ensure it's visible
+          elements.fingerprintResult.textContent = fingerprint.toFixed(2);
+          console.log(
+            "Force updated fingerprint result to:",
+            fingerprint.toFixed(2)
+          );
+
+          await sleep(2000); // Give more time to see the fingerprint score
+          nextStep();
+
+          // Step 3: Show verification with database matching animation
+          await animateDatabaseMatching(fingerprint);
+          nextStep();
+
+          // Step 4: Verify and update status
+          const verification = verifyFingerprint(fingerprint);
+          console.log("Verification completed:", verification);
+          await updateStatusWithAnimation(verification, fingerprint);
+          updateCpuUI(verification.isApproved);
+
+          // Update final summary
+          updateFinalSummary(verification, fingerprint);
+
+          console.log("Signal processing completed successfully");
+        } catch (error) {
+          console.error("Error in processSignalWithAnimation:", error);
+          // Fallback: show error state
+          elements.statusText.textContent = "Error occurred";
+          elements.statusReason.textContent = "Please try again";
+        } finally {
+          state.isProcessing = false;
+        }
+      }
+
+      // --- Animation Functions ---
+
+      async function animateWorkflow() {
+        const steps = [
+          elements.workflow1,
+          elements.workflow2,
+          elements.workflow3,
+          elements.workflow4,
+        ];
+
+        for (let i = 0; i < steps.length; i++) {
+          steps[i].classList.add("active");
+          await sleep(800);
+          if (i < steps.length - 1) {
+            steps[i].classList.remove("active");
+          }
+        }
+      }
+
+      async function animateWaveform() {
+        elements.waveform.style.display = "block";
+        elements.waveform.style.animation = "wave-flow 1s ease-in-out";
+
+        // Create dynamic waveform based on signal type
+        if (state.currentSignal) {
+          const isAlly = state.currentSignal.SNR > 20;
+          elements.waveform.style.background = isAlly
+            ? "linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%)"
+            : "linear-gradient(90deg, #ef4444 0%, #f87171 50%, #ef4444 100%)";
+        }
+
+        await sleep(2000);
+      }
+
+      async function updateSignalUIWithAnimation() {
+        if (!state.currentSignal) return;
+
+        const { T, Freq, Meta, Phase } = state.currentSignal;
+        const values = [T, Freq, Meta, Phase];
+        const elements_array = [
+          elements.timingVal,
+          elements.freqVal,
+          elements.metaVal,
+          elements.phaseVal,
+        ];
+
+        for (let i = 0; i < values.length; i++) {
+          await animateValue(elements_array[i], 0, values[i], 1000);
+          await sleep(200);
+        }
+      }
+
+      async function generateFingerprintWithProgress() {
         const fingerprint = calculateFingerprint();
-        const isApproved = verifyFingerprint(fingerprint);
-        updateSignalUI();
-        updateFingerprintUI(fingerprint);
-        updateStatusUI(isApproved, fingerprint);
-        updateCpuUI(isApproved);
+        console.log("Calculated fingerprint:", fingerprint);
+
+        // Generate fingerprint visualization first
+        await generateFingerprintVisualization(fingerprint);
+
+        // Animate final result
+        await animateValue(elements.fingerprintResult, 0, fingerprint, 2000);
+
+        // Ensure the score is visible - force update
+        elements.fingerprintResult.textContent = fingerprint.toFixed(2);
+        console.log("Set fingerprint result text to:", fingerprint.toFixed(2));
+
+        // Wait a bit more to ensure the score is visible
+        await sleep(1000);
+
+        return fingerprint;
+      }
+
+      async function generateFingerprintVisualization(fingerprint) {
+        console.log("Generating fingerprint visualization for:", fingerprint);
+
+        if (!elements.fingerprintVisual) {
+          console.error("Fingerprint visual element not found!");
+          return;
+        }
+
+        elements.fingerprintVisual.innerHTML = "";
+
+        // Create 256-bit fingerprint visualization (16x16 grid)
+        const bits = [];
+        const fingerprintStr = fingerprint.toString();
+
+        // Generate deterministic but varied pattern
+        for (let i = 0; i < 256; i++) {
+          const char = fingerprintStr.charCodeAt(i % fingerprintStr.length);
+          const bit = (char + i) % 2;
+          bits.push(bit);
+        }
+
+        console.log("Generated bits array length:", bits.length);
+
+        // Create visual elements with staggered animation
+        for (let i = 0; i < bits.length; i++) {
+          const bit = document.createElement("div");
+          bit.className = `fingerprint-bit ${bits[i] ? "active" : "inactive"}`;
+          bit.style.animationDelay = `${i * 5}ms`; // Faster animation
+          elements.fingerprintVisual.appendChild(bit);
+        }
+
+        console.log(
+          "Created fingerprint visualization with",
+          elements.fingerprintVisual.children.length,
+          "bits"
+        );
+        await sleep(1500); // Reduced wait time
+      }
+
+      async function animateDatabaseMatching(fingerprint) {
+        console.log(
+          "Starting database matching animation for fingerprint:",
+          fingerprint
+        );
+
+        // Reset status to processing
+        elements.statusBox.className = "status-badge status-pending";
+        elements.statusText.textContent = "Processing...";
+        elements.statusReason.textContent = "Scanning database entries";
+
+        let matchFound = false;
+
+        // Animate through each database entry
+        for (let i = 0; i < state.database.length; i++) {
+          const dbEntry = state.database[i];
+          const distance = Math.abs(dbEntry - fingerprint);
+
+          // Update status to show current comparison
+          elements.statusReason.textContent = `Comparing with entry ${
+            i + 1
+          }: ${dbEntry.toFixed(2)} (distance: ${distance.toFixed(2)})`;
+
+          // Highlight the current database entry being compared
+          highlightDatabaseEntry(i);
+
+          await sleep(800); // Pause to show each comparison
+
+          // If this is a match, show it and break
+          if (distance <= state.tolerance) {
+            elements.statusReason.textContent = `✓ MATCH FOUND! Entry ${
+              i + 1
+            } matches within tolerance`;
+            elements.statusBox.className = "status-badge status-approved";
+            elements.statusText.textContent = "Match Detected";
+            matchFound = true;
+            await sleep(1500);
+            break;
+          }
+        }
+
+        // Only show "No Match" if no match was found in the loop
+        if (!matchFound) {
+          elements.statusReason.textContent =
+            "No matching entries found in database";
+          elements.statusBox.className = "status-badge status-deceptive";
+          elements.statusText.textContent = "No Match";
+          await sleep(1500);
+        }
+
+        // Clear highlights
+        clearDatabaseHighlights();
+      }
+
+      function highlightDatabaseEntry(index) {
+        // Clear previous highlights
+        clearDatabaseHighlights();
+
+        // Highlight current entry
+        const dbEntries = elements.dbList.children;
+        if (dbEntries[index]) {
+          dbEntries[index].style.background =
+            "linear-gradient(135deg, #3b82f6, #1d4ed8)";
+          dbEntries[index].style.transform = "scale(1.05)";
+          dbEntries[index].style.boxShadow = "0 0 20px rgba(59, 130, 246, 0.5)";
+        }
+      }
+
+      function clearDatabaseHighlights() {
+        const dbEntries = elements.dbList.children;
+        for (let i = 0; i < dbEntries.length; i++) {
+          dbEntries[i].style.background = "";
+          dbEntries[i].style.transform = "";
+          dbEntries[i].style.boxShadow = "";
+        }
+      }
+
+      async function updateStatusWithAnimation(verification, fingerprint) {
+        try {
+          // Reset status
+          elements.statusBox.className = "status-badge status-pending";
+          elements.statusText.textContent = "Processing...";
+          elements.statusReason.textContent =
+            "Analyzing signal characteristics";
+
+          await sleep(1500);
+
+          // Update with final result
+          if (verification.isApproved) {
+            elements.statusBox.className = "status-badge status-approved";
+            elements.statusText.textContent = "✓ SIGNAL APPROVED";
+            elements.statusReason.textContent = `Fingerprint ${fingerprint.toFixed(
+              2
+            )} matches known pattern (confidence: ${(
+              verification.confidence * 100
+            ).toFixed(1)}%)`;
+
+            // Add green glow effect to status box
+            elements.statusBox.style.boxShadow =
+              "0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3)";
+            elements.statusBox.style.border =
+              "2px solid rgba(16, 185, 129, 0.8)";
+          } else {
+            elements.statusBox.className = "status-badge status-deceptive";
+            elements.statusText.textContent = "⚠ THREAT DETECTED";
+            elements.statusReason.textContent = `Fingerprint ${fingerprint.toFixed(
+              2
+            )} does not match any authorized signals (distance: ${verification.distance.toFixed(
+              2
+            )})`;
+
+            // Add red glow effect to status box
+            elements.statusBox.style.boxShadow =
+              "0 0 30px rgba(239, 68, 68, 0.6), 0 0 60px rgba(239, 68, 68, 0.3)";
+            elements.statusBox.style.border =
+              "2px solid rgba(239, 68, 68, 0.8)";
+          }
+
+          // Wait a bit more to show the result
+          await sleep(2000);
+        } catch (error) {
+          console.error("Error in updateStatusWithAnimation:", error);
+          // Fallback to simple update
+          elements.statusBox.className = verification.isApproved
+            ? "status-badge status-approved"
+            : "status-badge status-deceptive";
+          elements.statusText.textContent = verification.isApproved
+            ? "✓ SIGNAL APPROVED"
+            : "⚠ THREAT DETECTED";
+        }
+      }
+
+      function animateValue(element, start, end, duration) {
+        return new Promise((resolve) => {
+          try {
+            console.log(
+              "Animating value from",
+              start,
+              "to",
+              end,
+              "for element:",
+              element
+            );
+            const startTime = performance.now();
+            const animate = (currentTime) => {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const current = start + (end - start) * progress;
+
+              if (element && element.textContent !== undefined) {
+                element.textContent = current.toFixed(2);
+              }
+
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                console.log(
+                  "Animation completed, final value:",
+                  end.toFixed(2)
+                );
+                resolve();
+              }
+            };
+            requestAnimationFrame(animate);
+          } catch (error) {
+            console.error("Error in animateValue:", error);
+            // Fallback: set value directly
+            if (element && element.textContent !== undefined) {
+              element.textContent = end.toFixed(2);
+              console.log("Fallback: set value directly to", end.toFixed(2));
+            }
+            resolve();
+          }
+        });
       }
 
       // --- UI Update Functions ---
-
-      function updateSignalUI() {
-        if (!state.currentSignal) return;
-        const { T, Freq, Meta, Phase } = state.currentSignal;
-        elements.timingVal.textContent = T.toFixed(2);
-        elements.freqVal.textContent = Freq.toFixed(2);
-        elements.metaVal.textContent = Meta.toFixed(2);
-        elements.phaseVal.textContent = Phase.toFixed(2);
-      }
 
       function updateWeightsUI() {
         elements.w1Val.textContent = state.weights.w1.toFixed(2);
@@ -499,77 +1648,151 @@
         elements.w4Slider.value = state.weights.w4;
       }
 
-      function updateFingerprintUI(fingerprint) {
-        elements.fingerprintResult.textContent = fingerprint.toFixed(2);
-      }
-
-      function updateStatusUI(isApproved, fingerprint) {
-        elements.statusBox.className = "status-badge"; // Reset classes
-        if (isApproved) {
-          elements.statusBox.classList.add("status-approved");
-          elements.statusText.textContent = "Approved";
-          elements.statusReason.textContent = `Fingerprint ${fingerprint.toFixed(
-            2
-          )} is within tolerance of a known signal.`;
-        } else {
-          elements.statusBox.classList.add("status-deceptive");
-          elements.statusText.textContent = "Deceptive Signal";
-          elements.statusReason.textContent = `Fingerprint ${fingerprint.toFixed(
-            2
-          )} does not match any known authorized signal.`;
-        }
-      }
-
       function updateCpuUI(isApproved) {
+        elements.uavIcon.className = "fas fa-drone uav-icon";
+
         if (isApproved) {
-          elements.cpuLog.textContent = "Command Processed";
-          elements.cpuSubtext.textContent = "Valid commands sent to UAV.";
-          elements.uavIcon.classList.add("uav-active");
+          elements.cpuLog.textContent = "COMMAND EXECUTED";
+          elements.cpuSubtext.textContent =
+            "UAV proceeding with mission parameters";
+          elements.uavIcon.classList.add("active");
+
+          // Add green glow effect
+          elements.uavIcon.style.boxShadow =
+            "0 0 30px rgba(16, 185, 129, 0.8), 0 0 60px rgba(16, 185, 129, 0.4)";
+          elements.uavIcon.style.filter =
+            "drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))";
+
+          // Add glow to the entire UAV container
+          const uavContainer = elements.uavIcon.parentElement;
+          uavContainer.style.boxShadow = "0 0 40px rgba(16, 185, 129, 0.3)";
+          uavContainer.style.border = "2px solid rgba(16, 185, 129, 0.5)";
         } else {
-          elements.cpuLog.textContent = "Command Blocked";
-          elements.cpuSubtext.textContent = "Signal rejected. No action taken.";
-          elements.uavIcon.classList.remove("uav-active");
+          elements.cpuLog.textContent = "COMMAND BLOCKED";
+          elements.cpuSubtext.textContent =
+            "Threat detected - UAV in safe mode";
+          elements.uavIcon.classList.add("blocked");
+
+          // Add red glow effect
+          elements.uavIcon.style.boxShadow =
+            "0 0 30px rgba(239, 68, 68, 0.8), 0 0 60px rgba(239, 68, 68, 0.4)";
+          elements.uavIcon.style.filter =
+            "drop-shadow(0 0 10px rgba(239, 68, 68, 0.6))";
+
+          // Add glow to the entire UAV container
+          const uavContainer = elements.uavIcon.parentElement;
+          uavContainer.style.boxShadow = "0 0 40px rgba(239, 68, 68, 0.3)";
+          uavContainer.style.border = "2px solid rgba(239, 68, 68, 0.5)";
         }
       }
 
       function updateDatabaseUI() {
         elements.dbList.innerHTML = "";
-        state.database.forEach((fp) => {
+        state.database.forEach((fp, index) => {
           const div = document.createElement("div");
           div.className = "db-entry";
-          div.textContent = fp.toFixed(2);
+          div.textContent = `FP-${String(index + 1).padStart(
+            3,
+            "0"
+          )}: ${fp.toFixed(2)}`;
           elements.dbList.appendChild(div);
         });
       }
 
+      function updateFinalSummary(verification, fingerprint) {
+        elements.signalType.textContent = state.signalType;
+        elements.finalFingerprint.textContent = fingerprint.toFixed(2);
+        elements.finalVerification.textContent = verification.isApproved
+          ? "✓ Verified"
+          : "⚠ Rejected";
+        elements.finalAction.textContent = verification.isApproved
+          ? "Command Executed"
+          : "Command Blocked";
+      }
+
+      function resetJourney() {
+        state.currentStepNumber = 1;
+        state.currentSignal = null;
+        state.signalType = null;
+        state.isProcessing = false;
+
+        // Reset all UI elements
+        elements.timingVal.textContent = "0.00";
+        elements.freqVal.textContent = "0.00";
+        elements.metaVal.textContent = "0.00";
+        elements.phaseVal.textContent = "0.00";
+        elements.fingerprintResult.textContent = "0.00";
+        elements.statusText.textContent = "Awaiting Signal...";
+        elements.statusReason.textContent = "";
+        elements.cpuLog.textContent = "Idle";
+        elements.cpuSubtext.textContent = "Awaiting signal verification";
+
+        // Reset status box
+        elements.statusBox.className = "status-badge status-pending";
+        elements.statusBox.style.boxShadow = "";
+        elements.statusBox.style.border = "";
+
+        // Reset UAV
+        elements.uavIcon.classList.remove("active", "blocked");
+        elements.uavIcon.style.boxShadow = "";
+        elements.uavIcon.style.filter = "";
+
+        // Reset UAV container
+        const uavContainer = elements.uavIcon.parentElement;
+        uavContainer.style.boxShadow = "";
+        uavContainer.style.border = "";
+
+        // Reset final summary
+        elements.signalType.textContent = "-";
+        elements.finalFingerprint.textContent = "-";
+        elements.finalVerification.textContent = "-";
+        elements.finalAction.textContent = "-";
+
+        // Show step 1
+        showStep(1);
+
+        // Clear fingerprint visualization
+        elements.fingerprintVisual.innerHTML = "";
+      }
+
+      function clearAllAnimations() {
+        state.animationTimers.forEach((timer) => clearTimeout(timer));
+        state.animationTimers = [];
+
+        // Reset workflow animations
+        [
+          elements.workflow1,
+          elements.workflow2,
+          elements.workflow3,
+          elements.workflow4,
+        ].forEach((el) => el.classList.remove("active"));
+
+        // Reset UAV animations
+        elements.uavIcon.classList.remove("active", "blocked");
+      }
+
       // --- Event Listeners ---
-      elements.allySignalBtn.addEventListener("click", () =>
+      elements.originalSignalBtn.addEventListener("click", () =>
         generateSignal(true)
       );
-      elements.adversarySignalBtn.addEventListener("click", () =>
+      elements.spoofedSignalBtn.addEventListener("click", () =>
         generateSignal(false)
       );
-      elements.learnBtn.addEventListener("click", learnFromSignal);
-
-      [
-        elements.w1Slider,
-        elements.w2Slider,
-        elements.w3Slider,
-        elements.w4Slider,
-      ].forEach((slider) => {
-        slider.addEventListener("input", (e) => {
-          state.weights[e.target.id] = parseFloat(e.target.value);
-          updateWeightsUI();
-          if (state.currentSignal) {
-            processSignal();
-          }
-        });
-      });
+      elements.restartBtn.addEventListener("click", resetJourney);
 
       // --- Initial Load ---
       window.onload = () => {
-        updateWeightsUI();
         updateDatabaseUI();
+
+        // Initialize fingerprint visualization
+        generateFingerprintVisualization(0);
+
+        // Add some initial database entries with better formatting
+        state.database = [245.8, 312.4, 289.1, 267.3, 301.7];
+        updateDatabaseUI();
+
+        // Show first step
+        showStep(1);
       };
     </script>
   </body>
